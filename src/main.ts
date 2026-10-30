@@ -4,6 +4,7 @@ import { BootScene } from './scenes/BootScene';
 import { PreloadScene } from './scenes/PreloadScene';
 import { StationScene } from './scenes/StationScene';
 import { TitleScene } from './scenes/TitleScene';
+import { layoutOverlay } from './ui/overlay';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -35,7 +36,10 @@ function applyZoom(): void {
   if (game.scale.zoom !== zoom) {
     game.scale.setZoom(zoom);
   }
+  // La capa HTML sigue al canvas: tras el reflow, misma posición y mismo factor de escala.
+  requestAnimationFrame(() => layoutOverlay(game.canvas));
 }
 
 game.events.once(Phaser.Core.Events.READY, applyZoom);
 window.addEventListener('resize', applyZoom);
+game.scale.on(Phaser.Scale.Events.RESIZE, () => layoutOverlay(game.canvas));

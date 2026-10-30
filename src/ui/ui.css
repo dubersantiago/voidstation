@@ -1,0 +1,411 @@
+/* Capa de UI (§9.6): bordes de 1 px estilo terminal, solo colores de la paleta (variables de overlay.ts).
+   Medidas en píxeles de resolución interna; overlay.ts escala todo con el zoom entero del canvas. */
+
+#ui {
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  pointer-events: none;
+  overflow: hidden;
+  /* Fuente provisional: la fuente pixel con tildes/ñ está pendiente (§9.6). */
+  font-family: monospace;
+  font-size: 8px;
+  line-height: 10px;
+  color: var(--text);
+  user-select: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* --- HUD --- */
+.hud-index {
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  color: var(--amber2);
+}
+.hud-light {
+  position: absolute;
+  right: 6px;
+  top: 4px;
+  color: var(--metal2);
+}
+.hud-light.on {
+  color: var(--amber3);
+}
+.hud-help {
+  position: absolute;
+  left: 6px;
+  bottom: 4px;
+  color: var(--metal1);
+}
+
+/* --- Visor (§9.6): esquinas, retícula, distancia y luz --- */
+.visor {
+  position: absolute;
+  inset: 0;
+}
+.visor-frame {
+  position: absolute;
+  /* left/top/width/height los fija Visor.ts desde PHOTO_FRAME */
+}
+.visor-corner {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 0 solid var(--metal3);
+}
+.visor.shot .visor-corner {
+  border-color: var(--amber3);
+}
+.visor-corner.tl { left: -1px; top: -1px; border-left-width: 1px; border-top-width: 1px; }
+.visor-corner.tr { right: -1px; top: -1px; border-right-width: 1px; border-top-width: 1px; }
+.visor-corner.bl { left: -1px; bottom: -1px; border-left-width: 1px; border-bottom-width: 1px; }
+.visor-corner.br { right: -1px; bottom: -1px; border-right-width: 1px; border-bottom-width: 1px; }
+
+.visor-reticle-h,
+.visor-reticle-v {
+  position: absolute;
+  background: var(--metal3);
+}
+.visor-reticle-h { width: 5px; height: 1px; left: 50%; top: 50%; margin: 0 0 0 -2px; }
+.visor-reticle-v { width: 1px; height: 5px; left: 50%; top: 50%; margin: -2px 0 0 0; }
+
+.visor-info {
+  position: absolute;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--metal3);
+}
+.visor-bar {
+  position: relative;
+  width: 64px;
+  height: 4px;
+  background: var(--void2);
+  border: 1px solid var(--metal1);
+}
+.visor-bar-ideal {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--bio1);
+}
+.visor-bar-mark {
+  position: absolute;
+  top: -2px;
+  width: 1px;
+  height: 8px;
+  background: var(--text);
+}
+.visor-light {
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--metal1);
+  background: var(--void2);
+}
+.visor-light.on {
+  background: var(--amber2);
+}
+
+/* --- Aviso de resultado de foto --- */
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  padding: 3px 6px;
+  background: var(--void1);
+  border: 1px solid var(--metal1);
+  white-space: pre;
+}
+.toast .stars {
+  color: var(--amber2);
+}
+.toast .ok {
+  color: var(--bio2);
+}
+.toast .no {
+  color: var(--metal1);
+}
+.toast .new {
+  color: var(--amber3);
+}
+
+/* --- Álbum (§4) --- */
+.album {
+  position: absolute;
+  inset: 12px;
+  display: flex;
+  flex-direction: column;
+  background: var(--void1);
+  border: 1px solid var(--metal1);
+  pointer-events: auto;
+  z-index: 1;
+}
+.album-head,
+.album-foot {
+  padding: 3px 6px;
+  color: var(--amber2);
+  border-bottom: 1px solid var(--void3);
+}
+.album-foot {
+  color: var(--metal1);
+  border-bottom: 0;
+  border-top: 1px solid var(--void3);
+}
+.album-grid {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: grid;
+  grid-template-columns: repeat(2, 162px);
+  justify-content: center;
+  gap: 8px;
+  padding: 6px;
+}
+.album-card img,
+.album-empty {
+  display: block;
+  width: 160px;
+  height: 90px;
+  border: 1px solid var(--metal0);
+  image-rendering: pixelated;
+}
+.album-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--void0);
+  color: var(--metal0);
+}
+.album-card .name {
+  margin-top: 2px;
+}
+.album-card .stars {
+  color: var(--amber2);
+}
+.album-card .tag {
+  color: var(--amber1);
+}
+
+/* --- Bestiario (§4, §13): fichas como terminal; texto seleccionable --- */
+.bestiary {
+  position: absolute;
+  inset: 8px;
+  display: flex;
+  flex-direction: column;
+  background: var(--void1);
+  border: 1px solid var(--metal1);
+  pointer-events: auto;
+  user-select: text;
+  /* Los modales tapan cualquier otro elemento de la capa (p. ej. el botón del título). */
+  z-index: 1;
+}
+.bestiary button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.bestiary-head {
+  display: flex;
+  gap: 8px;
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--void3);
+  user-select: none;
+}
+.bestiary-head .title {
+  color: var(--amber2);
+}
+.bestiary-head .mode {
+  color: var(--bio2);
+}
+.bestiary-head .keys {
+  margin-left: auto;
+  color: var(--metal1);
+}
+.bestiary-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+.bestiary-list {
+  width: 116px;
+  flex: none;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: 4px 0;
+  border-right: 1px solid var(--void3);
+  user-select: none;
+}
+.bestiary-list .group {
+  padding: 4px 6px 1px;
+  color: var(--metal1);
+}
+.bestiary-list .item {
+  display: block;
+  width: 100%;
+  padding: 1px 6px 1px 10px;
+  color: var(--metal3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bestiary-list .item:hover {
+  color: var(--text);
+}
+.bestiary-list .item.selected {
+  color: var(--void0);
+  background: var(--amber2);
+}
+.bestiary-list .stars,
+.ficha-head .stars {
+  color: var(--amber2);
+}
+.bestiary-list .item.selected .stars {
+  color: var(--void0);
+}
+.bestiary-ficha {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--metal0) var(--void1);
+  padding: 4px 8px 8px;
+}
+.bestiary-ficha h2 {
+  margin: 0;
+  font-size: 8px;
+  color: var(--amber2);
+}
+.ficha-head {
+  display: flex;
+  gap: 8px;
+}
+.bestiary-ficha .especie {
+  color: var(--bio2);
+  font-style: italic;
+}
+.bestiary-ficha .datos {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 8px;
+  margin: 4px 0;
+}
+.bestiary-ficha dt {
+  color: var(--metal2);
+}
+.bestiary-ficha dd {
+  margin: 0;
+}
+.bestiary-ficha .estado-en_construccion {
+  color: var(--amber1);
+}
+.bestiary-ficha .estado-planeado {
+  color: var(--metal1);
+}
+.bestiary-ficha section {
+  margin-top: 6px;
+  padding-top: 3px;
+  border-top: 1px solid var(--void3);
+}
+.bestiary-ficha h3 {
+  margin: 0 0 2px;
+  font-size: 8px;
+  color: var(--amber2);
+}
+.bestiary-ficha .locked,
+.bestiary-ficha .empty {
+  margin: 2px 0;
+  color: var(--metal1);
+}
+.bestiary-ficha .relaciones {
+  margin: 4px 0 0;
+  color: var(--metal2);
+}
+.bestiary-ficha .link {
+  color: var(--bio2);
+  text-decoration: underline;
+}
+
+/* Markdown renderizado */
+.md p,
+.md ul,
+.md ol,
+.md table,
+.md blockquote {
+  margin: 2px 0 4px;
+}
+.md ul,
+.md ol {
+  padding-left: 12px;
+}
+.md strong {
+  color: var(--amber3);
+}
+.md code {
+  font-family: inherit;
+  color: var(--bio3);
+}
+.md pre {
+  position: relative;
+  margin: 2px 0 4px;
+  padding: 3px 4px;
+  background: var(--void0);
+  border: 1px solid var(--void3);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.md pre code {
+  color: var(--text);
+}
+.md pre .copy {
+  position: sticky;
+  float: right;
+  left: 0;
+  color: var(--metal2);
+  user-select: none;
+}
+.md pre .copy:hover {
+  color: var(--amber2);
+}
+.md blockquote {
+  padding-left: 6px;
+  border-left: 1px solid var(--metal0);
+  color: var(--metal3);
+  font-style: italic;
+}
+.md table {
+  border-collapse: collapse;
+}
+.md th,
+.md td {
+  padding: 0 4px;
+  border: 1px solid var(--void3);
+  text-align: left;
+}
+
+/* --- Botón del título --- */
+.title-bestiary {
+  position: absolute;
+  left: 50%;
+  top: 226px;
+  transform: translateX(-50%);
+  padding: 2px 8px;
+  font: inherit;
+  color: var(--bio2);
+  background: var(--void1);
+  border: 1px solid var(--bio1);
+  cursor: pointer;
+  pointer-events: auto;
+}
+.title-bestiary:hover {
+  color: var(--bio3);
+  border-color: var(--bio2);
+}

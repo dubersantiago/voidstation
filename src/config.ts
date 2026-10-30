@@ -17,6 +17,39 @@ export const PLAYER_SPEED = 80;
  */
 export const CAMERA_DEADZONE = { width: 48, height: 32 } as const;
 
+/** Desplazamiento máximo de la cámara por frame (px enteros), para transiciones suaves sin subpíxel. */
+export const CAMERA_PAN_STEP = 4;
+
+// --- Fotografía (§4) ---
+
+/** Marco central del visor. También es el tamaño de la miniatura del álbum (máx. 160×90). */
+export const PHOTO_FRAME = { width: 160, height: 90 } as const;
+
+/** Fracción mínima del hitbox dentro del marco para que la foto cuente (1 ★). */
+export const PHOTO_MIN_FRAMING = 0.6;
+
+/** Segundos mínimos entre fotos. */
+export const PHOTO_COOLDOWN = 0.5;
+
+/** En modo cámara el jugador camina a esta fracción de su velocidad. */
+export const CAMERA_MODE_SPEED_FACTOR = 0.5;
+
+/**
+ * Al apuntar, el centro del marco queda a esta distancia (px, por eje) del centro del jugador.
+ * Con 96 el marco cubre de 16 a 176 px por delante en horizontal y de 51 a 141 en vertical:
+ * los `rango_ideal` del contenido deberían caer ahí.
+ */
+export const CAMERA_AIM_DISTANCE = 96;
+
+/** Linterna: alcance (px) y semiapertura del cono (grados). */
+export const FLASHLIGHT = { range: 160, halfAngle: 35 } as const;
+
+/** Ciclo del estado fotogénico (§8.3), en segundos: [mín, máx]. */
+export const PHOTOGENIC = { interval: [8, 16], duration: [2, 4] } as const;
+
+/** Clave de guardado en localStorage. Cambiar la versión invalida partidas incompatibles. */
+export const SAVE_KEY = 'voidstation:save:v1';
+
 /** Paleta única del juego (§9.2). No usar colores fuera de esta tabla. */
 export const PALETTE = {
   void0: 0x07070d,

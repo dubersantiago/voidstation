@@ -4,6 +4,9 @@ import { PLAYER_SPEED } from '../config';
 /** Hitbox de los pies: en vista 3/4 solo los pies chocan, la cabeza puede solapar muros. */
 const FEET = { width: 10, height: 6 } as const;
 
+/** Alto del sprite (§9.3). */
+export const PLAYER_HEIGHT = 24;
+
 /**
  * Jugador placeholder (16×24, §9.3).
  *
@@ -55,6 +58,24 @@ export class Player {
     return this.sprite.y;
   }
 
+  /** Centro del cuerpo dibujado (píxel entero): origen de distancias, linterna y encuadre. */
+  get centerX(): number {
+    return this.sprite.x;
+  }
+
+  get centerY(): number {
+    return this.sprite.y - PLAYER_HEIGHT / 2;
+  }
+
+  /** Dirección a la que mira: componentes -1, 0 o 1, nunca (0, 0). Empieza mirando abajo. */
+  readonly facing = { x: 0, y: 1 };
+
+  /** Multiplicador de velocidad (modo cámara, §4). */
+  speedFactor = 1;
+
+  /** Con la dirección bloqueada el jugador se mueve sin girar (modo cámara: mantiene el encuadre). */
+  facingLocked = false;
+
   update(): void {
     const k = this.keys;
     const dx = Number(k.right.isDown || k.d.isDown) - Number(k.left.isDown || k.a.isDown);
@@ -62,9 +83,14 @@ export class Player {
 
     // Normalizado: en diagonal no se va más rápido.
     const len = Math.hypot(dx, dy) || 1;
-    this.body.setVelocity((dx / len) * PLAYER_SPEED, (dy / len) * PLAYER_SPEED);
+    const speed = PLAYER_SPEED * this.speedFactor;
+    this.body.setVelocity((dx / len) * speed, (dy / len) * speed);
 
-    if (dx !== 0) this.sprite.setFlipX(dx < 0);
+    if ((dx !== 0 || dy !== 0) && !this.facingLocked) {
+      this.facing.x = dx;
+      this.facing.y = dy;
+      if (dx !== 0) this.sprite.setFlipX(dx < 0);
+    }
 
     this.syncSprite();
   }
@@ -72,5 +98,7 @@ export class Player {
   private syncSprite(): void {
     // Origen (0.5, 1) sobre 16 px de ancho: la esquina superior izquierda también queda entera.
     this.sprite.setPosition(Math.round(this.body.x + this.body.halfWidth), Math.round(this.body.bottom));
+    // Profundidad = base del sprite: se dibuja delante de lo que está más arriba en pantalla.
+    this.sprite.setDepth(this.sprite.y);
   }
 }

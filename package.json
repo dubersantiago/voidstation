@@ -5,15 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run typecheck && vite build",
+    "build:private": "npm run typecheck && vite build --mode private",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
-    "gen:placeholders": "node scripts/gen-placeholders.ts"
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json",
+    "gen:placeholders": "node scripts/gen-placeholders.ts",
+    "validate-content": "node scripts/validate-content.ts"
   },
   "dependencies": {
-    "phaser": "^4.2.1"
+    "marked": "^18.1.2",
+    "phaser": "^4.2.1",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
+    "@types/node": "^26.6.6",
     "typescript": "^7.0.2",
     "vite": "^8.3.5"
   }

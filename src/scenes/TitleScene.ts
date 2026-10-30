@@ -1,10 +1,14 @@
 import * as Phaser from 'phaser';
 import { css, GAME_HEIGHT, GAME_WIDTH, PALETTE } from '../config';
+import { SECTORES } from '../content';
+import { Bestiary, parseBestiaryRoute } from '../ui/Bestiary';
+import { modalGuardActive, pauseWhile } from '../ui/modal';
+import { clearUi, el, uiRoot } from '../ui/overlay';
 
 // Fuente provisional: la fuente pixel con tildes/ñ y licencia verificada está pendiente (§9.6).
 const FONT_FAMILY = 'monospace';
 
-/** Pantalla de título (Fase 0). Solo usa colores de la paleta y posiciones enteras. */
+/** Pantalla de título. Solo usa colores de la paleta y posiciones enteras. */
 export class TitleScene extends Phaser.Scene {
   constructor() {
     super('Title');
@@ -43,11 +47,47 @@ export class TitleScene extends Phaser.Scene {
     const start = () => {
       if (started) return;
       started = true;
-      this.scene.start('Station', { mapa: 'muelle' });
+      // La partida empieza en el primer sector de content/sectores.yaml.
+      this.scene.start('Station', { sector: SECTORES[0]?.id });
     };
-    this.input.keyboard?.once('keydown-ENTER', start);
-    this.input.keyboard?.once('keydown-SPACE', start);
-    this.input.once('pointerdown', start);
+    this.input.keyboard?.on('keydown-ENTER', start);
+    this.input.keyboard?.on('keydown-SPACE', start);
+    this.input.on('pointerdown', start);
+
+    this.setupBestiary();
+  }
+
+  /**
+   * Modo Bestiario directo (§13): botón o tecla B, sin jugar y con todo desbloqueado.
+   * También se abre con la ruta `/#/bestiario/<id>`, al cargar o al cambiar el hash.
+   */
+  private setupBestiary(): void {
+    clearUi();
+    const bestiary = new Bestiary();
+    const open = (id: string | null) => {
+      if (bestiary.isOpen) return;
+      pauseWhile(this, (done) => bestiary.open({ tipo: 'directo' }, id, done));
+    };
+
+    const button = el('button', 'title-bestiary', uiRoot());
+    button.type = 'button';
+    button.textContent = 'BESTIARIO [B]';
+    button.addEventListener('click', () => open(null));
+
+    this.input.keyboard?.on('keydown-B', () => {
+      if (!modalGuardActive()) open(null);
+    });
+
+    const fromHash = () => {
+      const route = parseBestiaryRoute(location.hash);
+      if (route) open(route.id);
+    };
+    window.addEventListener('hashchange', fromHash);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      window.removeEventListener('hashchange', fromHash);
+      clearUi();
+    });
+    fromHash();
   }
 
   /** Centra en horizontal redondeando a píxel entero (evita medio píxel con origin 0.5). */

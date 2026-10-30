@@ -1,0 +1,28 @@
+# Sectores de la estación (§5, §8.2). El primero de la lista es donde empieza la partida.
+# mapa: archivo en public/assets/maps/, o ??? si el sector aún no tiene mapa.
+# fotos_requeridas: fotos para abrir el sector (§3). ??? = por decidir.
+
+- id: muelle
+  nombre: Muelle de Atraque
+  mapa: muelle.tmj
+  fotos_requeridas: 0
+- id: fundicion
+  nombre: Fundición
+  mapa: ???
+  fotos_requeridas: 2
+- id: titanes
+  nombre: Bahía de Titanes
+  mapa: ???
+  fotos_requeridas: ???
+- id: colmena
+  nombre: La Colmena
+  mapa: ???
+  fotos_requeridas: ???
+- id: bovedas
+  nombre: Bóvedas
+  mapa: ???
+  fotos_requeridas: ???
+- id: archivos
+  nombre: Sala de Archivos
+  mapa: ???
+  fotos_requeridas: ???
