@@ -29,7 +29,7 @@ import { Hud } from '../ui/Hud';
 import { modalGuardActive, pauseWhile } from '../ui/modal';
 import { clearUi } from '../ui/overlay';
 import { RegistroPanel } from '../ui/RegistroPanel';
-import { FRAME_SCREEN, Visor } from '../ui/Visor';
+import { Visor } from '../ui/Visor';
 
 // Fuente provisional: la fuente pixel con tildes/ñ y licencia verificada está pendiente (§9.6).
 const FONT_FAMILY = 'monospace';
@@ -147,7 +147,11 @@ export class StationScene extends Phaser.Scene {
     this.checkGates();
     this.checkSignals();
     this.hud.setPrompt(this.promptFor(this.nearestInteractable()));
-    if (this.cameraMode) this.visor.setTarget(this.bestTarget());
+    if (this.cameraMode) {
+      const f = this.frameScreen();
+      this.visor.setFrame(f.x, f.y);
+      this.visor.setTarget(this.bestTarget());
+    }
     this.lighting.draw(this.cameras.main, this.lightStamps());
   }
 
@@ -215,10 +219,31 @@ export class StationScene extends Phaser.Scene {
     return { x: this.player.centerX, y: this.player.centerY, facing: this.player.facing, on: this.flashlightOn };
   }
 
-  /** Marco central del visor en coordenadas del mundo. */
+  /** Punto al que se apunta (mundo): `CAMERA_AIM_DISTANCE` por delante del jugador en cada eje. */
+  private aimPoint(): { x: number; y: number } {
+    const f = this.player.facing;
+    return { x: this.player.centerX + f.x * CAMERA_AIM_DISTANCE, y: this.player.centerY + f.y * CAMERA_AIM_DISTANCE };
+  }
+
+  /**
+   * Marco del visor en pantalla (esquina superior izquierda), centrado en el punto de apunte.
+   * Normalmente la cámara sigue ese punto y el marco queda en el centro; junto al borde del mapa la
+   * cámara se detiene y el marco se desliza por la pantalla (sin salir de ella). Píxel entero.
+   */
+  private frameScreen(): { x: number; y: number } {
+    const cam = this.cameras.main;
+    const a = this.aimPoint();
+    return {
+      x: Phaser.Math.Clamp(Math.round(a.x - cam.scrollX - PHOTO_FRAME.width / 2), 0, GAME_WIDTH - PHOTO_FRAME.width),
+      y: Phaser.Math.Clamp(Math.round(a.y - cam.scrollY - PHOTO_FRAME.height / 2), 0, GAME_HEIGHT - PHOTO_FRAME.height),
+    };
+  }
+
+  /** Marco del visor en coordenadas del mundo. */
   private frameWorld(): Phaser.Geom.Rectangle {
     const cam = this.cameras.main;
-    return new Phaser.Geom.Rectangle(cam.scrollX + FRAME_SCREEN.x, cam.scrollY + FRAME_SCREEN.y, PHOTO_FRAME.width, PHOTO_FRAME.height);
+    const f = this.frameScreen();
+    return new Phaser.Geom.Rectangle(cam.scrollX + f.x, cam.scrollY + f.y, PHOTO_FRAME.width, PHOTO_FRAME.height);
   }
 
   private scoreAll(): PhotoScore[] {
@@ -252,7 +277,8 @@ export class StationScene extends Phaser.Scene {
 
     // Miniatura del álbum: el contenido del marco tal como se ve en el canvas (sin la capa HTML).
     if (mejoradas.length) {
-      this.game.renderer.snapshotArea(FRAME_SCREEN.x, FRAME_SCREEN.y, PHOTO_FRAME.width, PHOTO_FRAME.height, (img) => {
+      const f = this.frameScreen();
+      this.game.renderer.snapshotArea(f.x, f.y, PHOTO_FRAME.width, PHOTO_FRAME.height, (img) => {
         if (img instanceof HTMLImageElement) this.progress.setFoto(mejoradas, img.src);
       });
     }
@@ -407,9 +433,9 @@ export class StationScene extends Phaser.Scene {
   }
 
   /**
-   * Fuera del modo cámara: zona muerta. En modo cámara: la vista se adelanta hacia donde mira el
-   * jugador para que el marco central quede delante de él. El paso por frame está limitado y es
-   * entero: transiciones suaves sin subpíxel (§9.1).
+   * Fuera del modo cámara: zona muerta. En modo cámara: la vista intenta centrar el punto de apunte
+   * (ver `frameScreen`; en los bordes del mapa es el marco el que se desliza). El paso por frame
+   * está limitado y es entero: transiciones suaves sin subpíxel (§9.1).
    */
   private followPlayer(): void {
     const cam = this.cameras.main;
@@ -419,9 +445,9 @@ export class StationScene extends Phaser.Scene {
     let ty: number;
 
     if (this.cameraMode) {
-      const f = this.player.facing;
-      tx = x + f.x * CAMERA_AIM_DISTANCE - GAME_WIDTH / 2;
-      ty = y + f.y * CAMERA_AIM_DISTANCE - GAME_HEIGHT / 2;
+      const a = this.aimPoint();
+      tx = a.x - GAME_WIDTH / 2;
+      ty = a.y - GAME_HEIGHT / 2;
     } else {
       const left = cam.scrollX + (GAME_WIDTH - CAMERA_DEADZONE.width) / 2;
       const top = cam.scrollY + (GAME_HEIGHT - CAMERA_DEADZONE.height) / 2;

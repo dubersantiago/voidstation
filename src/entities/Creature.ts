@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { type Agent, type Behavior, flee, getBehavior } from '../behaviors';
 import { css, FLEE, PALETTE, PHOTOGENIC, type PaletteKey } from '../config';
 import type { Criatura, Estado } from '../content';
+import { spriteAnimKey, type SpriteInfo, spriteInfo } from '../systems/Sprites';
 
 // Fuente provisional: la fuente pixel con tildes/ñ y licencia verificada está pendiente (§9.6).
 const FONT_FAMILY = 'monospace';
@@ -41,6 +42,9 @@ export class Creature {
   private readonly agent: Agent;
   private readonly behavior: Behavior;
   private border?: Phaser.GameObjects.Rectangle;
+  /** Arte final (si existe): se anima `idle` / `fotogenico`. */
+  private art?: { sprite: Phaser.GameObjects.Sprite; info: SpriteInfo };
+  private lastX = 0;
   private noise: Phaser.GameObjects.Rectangle[] = [];
   private photogenicTimer: number;
   private noiseTimer = 0;
@@ -85,6 +89,8 @@ export class Creature {
     this.photogenicTimer = this.nextPhotogenicInterval();
 
     this.view = scene.add.container(0, 0, this.buildView(scene));
+    this.lastX = this.agent.x;
+    this.playArt();
     this.sync();
   }
 
@@ -150,6 +156,18 @@ export class Creature {
     }
     const colors = this.colors();
     this.border?.setFillStyle(PALETTE[this.fotogenico ? colors.glow : colors.border]);
+    this.playArt();
+  }
+
+  /** Animación del arte final según el estado; si no tiene `fotogenico`, sigue en `idle`. */
+  private playArt(): void {
+    if (!this.art) return;
+    const { sprite, info } = this.art;
+    const name = this.fotogenico && info.anims.fotogenico ? 'fotogenico' : 'idle';
+    if (!info.anims[name]) return;
+    // Cada individuo empieza en un fotograma distinto: los enjambres no se mueven al unísono.
+    const startFrame = name === 'idle' ? this.agent.rng.between(0, info.anims.idle.frames.length - 1) : 0;
+    sprite.play({ key: spriteAnimKey(this.datos.sprite, name), startFrame });
   }
 
   /** `dormido` (en construcción) "despierta" con la mitad de frecuencia. */
@@ -173,6 +191,11 @@ export class Creature {
     this.view.setPosition(Math.round(this.agent.x - w / 2), Math.round(this.agent.y - h / 2));
     this.view.setDepth(this.bottom);
     this.view.setVisible(!this.agent.hidden);
+
+    // Si el dibujo mira a la derecha, se voltea al desplazarse a la izquierda (con margen contra temblores).
+    const dx = this.agent.x - this.lastX;
+    if (this.art?.info.mira === 'derecha' && Math.abs(dx) > 0.05) this.art.sprite.setFlipX(dx < 0);
+    this.lastX = this.agent.x;
   }
 
   private colors() {
@@ -181,9 +204,12 @@ export class Creature {
 
   private buildView(scene: Phaser.Scene): Phaser.GameObjects.GameObject[] {
     const [w, h] = this.datos.hitbox;
-    if (scene.textures.exists(this.datos.sprite)) {
-      // Origen abajo-centro: la base del sprite coincide con la del hitbox.
-      return [scene.add.image(Math.round(w / 2), h, this.datos.sprite).setOrigin(0.5, 1)];
+    const info = spriteInfo(scene, this.datos.sprite);
+    if (info) {
+      // Origen abajo-centro: la base del sprite coincide con la del hitbox (ancho par: queda entero).
+      const sprite = scene.add.sprite(Math.round(w / 2), h, this.datos.sprite).setOrigin(0.5, 1);
+      this.art = { sprite, info };
+      return [sprite];
     }
 
     const label = (text: string, color: PaletteKey) => {

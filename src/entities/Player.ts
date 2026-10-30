@@ -1,5 +1,9 @@
 import * as Phaser from 'phaser';
 import { PLAYER_SPEED, SNEAK_SPEED_FACTOR } from '../config';
+import { spriteAnimKey, spriteInfo } from '../systems/Sprites';
+
+/** Clave del arte final del jugador; si no está cargado se usa `jugador-placeholder`. */
+const SPRITE = 'jugador';
 
 /** Hitbox de los pies: en vista 3/4 solo los pies chocan, la cabeza puede solapar muros. */
 const FEET = { width: 10, height: 6 } as const;
@@ -8,14 +12,16 @@ const FEET = { width: 10, height: 6 } as const;
 export const PLAYER_HEIGHT = 24;
 
 /**
- * Jugador placeholder (16×24, §9.3).
+ * Jugador (16×24, §9.3). Con el arte final anima `abajo`, `arriba` y `lado` (volteado a la
+ * izquierda) según la dirección a la que mira; quieto, muestra el primer fotograma.
  *
  * La física se mueve en coordenadas fraccionarias sobre una Zone invisible; el sprite visible
  * se coloca cada frame en la posición redondeada. Así la velocidad lenta no se pierde por el
  * redondeo y lo que se dibuja siempre cae en píxel entero (§9.1).
  */
 export class Player {
-  readonly sprite: Phaser.GameObjects.Image;
+  readonly sprite: Phaser.GameObjects.Sprite;
+  private readonly animated: boolean;
   private readonly feet: Phaser.GameObjects.Zone;
   private readonly body: Phaser.Physics.Arcade.Body;
   private readonly keys: Record<'up' | 'down' | 'left' | 'right' | 'w' | 'a' | 's' | 'd' | 'sneak', Phaser.Input.Keyboard.Key>;
@@ -26,7 +32,8 @@ export class Player {
     scene.physics.add.existing(this.feet);
     this.body = this.feet.body as Phaser.Physics.Arcade.Body;
 
-    this.sprite = scene.add.image(0, 0, 'jugador').setOrigin(0.5, 1);
+    this.animated = spriteInfo(scene, SPRITE) !== null;
+    this.sprite = scene.add.sprite(0, 0, this.animated ? SPRITE : 'jugador-placeholder').setOrigin(0.5, 1);
 
     const kb = scene.input.keyboard!;
     const K = Phaser.Input.Keyboard.KeyCodes;
@@ -99,13 +106,29 @@ export class Player {
     this.noisy = moving && !sneaking && this.speedFactor >= 1;
     this.body.setVelocity((dx / len) * speed, (dy / len) * speed);
 
-    if ((dx !== 0 || dy !== 0) && !this.facingLocked) {
+    if (moving && !this.facingLocked) {
       this.facing.x = dx;
       this.facing.y = dy;
       if (dx !== 0) this.sprite.setFlipX(dx < 0);
     }
 
+    this.animate(moving);
     this.syncSprite();
+  }
+
+  /** Animación según la dirección a la que mira (la diagonal usa la vista lateral). */
+  private animate(moving: boolean): void {
+    if (!this.animated) return;
+    const dir = this.facing.x !== 0 ? 'lado' : this.facing.y < 0 ? 'arriba' : 'abajo';
+    const key = spriteAnimKey(SPRITE, dir);
+    if (moving) {
+      if (this.sprite.anims.currentAnim?.key !== key || !this.sprite.anims.isPlaying) this.sprite.play(key);
+    } else {
+      // Quieto: primer fotograma de esa dirección.
+      this.sprite.anims.stop();
+      const first = this.sprite.scene.anims.get(key)?.frames[0]?.frame;
+      if (first) this.sprite.setFrame(first.name);
+    }
   }
 
   private syncSprite(): void {

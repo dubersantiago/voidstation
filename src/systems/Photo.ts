@@ -6,7 +6,7 @@ import { inFlashlight, type LightSource } from './Lighting';
 
 export interface PhotoScore {
   creature: Creature;
-  /** Fracción del hitbox dentro del marco (0–1). */
+  /** Fracción encuadrada (0–1), ver `framingFraction`. */
   encuadre: number;
   distancia: number;
   enRango: boolean;
@@ -16,12 +16,17 @@ export interface PhotoScore {
   estrellas: number;
 }
 
-/** Fracción del área de `inner` que cae dentro de `outer`. */
-function overlapFraction(inner: Phaser.Geom.Rectangle, outer: Phaser.Geom.Rectangle): number {
-  const w = Math.min(inner.right, outer.right) - Math.max(inner.left, outer.left);
-  const h = Math.min(inner.bottom, outer.bottom) - Math.max(inner.top, outer.top);
+/**
+ * Fracción encuadrada: área de `hitbox` dentro de `frame`, dividida por la parte del hitbox que
+ * podría caber en el marco. Así una criatura más grande que el marco (el Gusano, un Titán) cuenta
+ * entera cuando la llena, en vez de exigir centrarla al píxel.
+ */
+function framingFraction(hitbox: Phaser.Geom.Rectangle, frame: Phaser.Geom.Rectangle): number {
+  const w = Math.min(hitbox.right, frame.right) - Math.max(hitbox.left, frame.left);
+  const h = Math.min(hitbox.bottom, frame.bottom) - Math.max(hitbox.top, frame.top);
   if (w <= 0 || h <= 0) return 0;
-  return (w * h) / (inner.width * inner.height);
+  const fits = Math.min(hitbox.width, frame.width) * Math.min(hitbox.height, frame.height);
+  return Math.min(1, (w * h) / fits);
 }
 
 /**
@@ -31,7 +36,7 @@ function overlapFraction(inner: Phaser.Geom.Rectangle, outer: Phaser.Geom.Rectan
  */
 export function scoreCreature(creature: Creature, frame: Phaser.Geom.Rectangle, light: LightSource): PhotoScore {
   // Las señales no identificadas y lo que está fuera del mundo (fase) no se pueden fotografiar.
-  const encuadre = creature.isSignal || !creature.visible ? 0 : overlapFraction(creature.rect, frame);
+  const encuadre = creature.isSignal || !creature.visible ? 0 : framingFraction(creature.rect, frame);
   const distancia = Math.hypot(creature.centerX - light.x, creature.centerY - light.y);
   const [min, max] = creature.datos.rango_ideal;
   const enRango = distancia >= min && distancia <= max;

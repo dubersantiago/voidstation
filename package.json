@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json",
     "gen:placeholders": "node scripts/gen-placeholders.ts",
-    "validate-content": "node scripts/validate-content.ts"
+    "validate-content": "node scripts/validate-content.ts",
+    "import-sprites": "python3 scripts/import-sprites.py"
   },
   "dependencies": {
     "marked": "^18.1.2",

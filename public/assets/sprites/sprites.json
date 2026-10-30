@@ -1,0 +1,255 @@
+{
+  "jugador": {
+    "file": "jugador.png",
+    "frameWidth": 16,
+    "frameHeight": 24,
+    "frames": 21,
+    "mira": "derecha",
+    "anims": {
+      "abajo": {
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "fps": 8,
+        "repeat": -1
+      },
+      "arriba": {
+        "frames": [
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "fps": 8,
+        "repeat": -1
+      },
+      "lado": {
+        "frames": [
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
+        ],
+        "fps": 8,
+        "repeat": -1
+      }
+    }
+  },
+  "jenkins-vigia": {
+    "file": "jenkins-vigia.png",
+    "frameWidth": 64,
+    "frameHeight": 96,
+    "frames": 8,
+    "mira": null,
+    "anims": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "repeat": -1
+      },
+      "fotogenico": {
+        "frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "fps": 6,
+        "repeat": 0
+      }
+    }
+  },
+  "terraform-arquitecta": {
+    "file": "terraform-arquitecta.png",
+    "frameWidth": 64,
+    "frameHeight": 64,
+    "frames": 8,
+    "mira": null,
+    "anims": {
+      "idle": {
+        "frames": [
+          0,
+          1
+        ],
+        "fps": 2,
+        "repeat": -1
+      },
+      "fotogenico": {
+        "frames": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 6,
+        "repeat": -1
+      }
+    }
+  },
+  "argocd-medusa": {
+    "file": "argocd-medusa.png",
+    "frameWidth": 48,
+    "frameHeight": 64,
+    "frames": 6,
+    "mira": null,
+    "anims": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "repeat": -1
+      },
+      "fotogenico": {
+        "frames": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "fps": 6,
+        "repeat": -1
+      }
+    }
+  },
+  "talos-obrera": {
+    "file": "talos-obrera.png",
+    "frameWidth": 24,
+    "frameHeight": 24,
+    "frames": 8,
+    "mira": "derecha",
+    "anims": {
+      "idle": {
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 6,
+        "repeat": -1
+      },
+      "fotogenico": {
+        "frames": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 4,
+        "repeat": 0
+      }
+    }
+  },
+  "talos-reina": {
+    "file": "talos-reina.png",
+    "frameWidth": 48,
+    "frameHeight": 48,
+    "frames": 10,
+    "mira": null,
+    "anims": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "repeat": -1
+      },
+      "fotogenico": {
+        "frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 6,
+        "repeat": 0
+      }
+    }
+  },
+  "titan-proxmox": {
+    "file": "titan-proxmox.png",
+    "frameWidth": 160,
+    "frameHeight": 128,
+    "frames": 8,
+    "mira": null,
+    "anims": {
+      "idle": {
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          2,
+          1
+        ],
+        "fps": 3,
+        "repeat": -1
+      },
+      "fotogenico": {
+        "frames": [
+          4,
+          5,
+          6,
+          7,
+          6,
+          5
+        ],
+        "fps": 3,
+        "repeat": -1
+      }
+    }
+  },
+  "helm-cangrejo": {
+    "file": "helm-cangrejo.png",
+    "frameWidth": 32,
+    "frameHeight": 24,
+    "frames": 9,
+    "mira": "derecha",
+    "anims": {
+      "idle": {
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "fps": 6,
+        "repeat": -1
+      },
+      "fotogenico": {
+        "frames": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "fps": 4,
+        "repeat": 0
+      }
+    }
+  }
+}

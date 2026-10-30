@@ -22,10 +22,16 @@ export const CAMERA_PAN_STEP = 4;
 
 // --- Fotografía (§4) ---
 
-/** Marco central del visor. También es el tamaño de la miniatura del álbum (máx. 160×90). */
+/**
+ * Marco del visor: se centra en el punto de apunte (se desliza en los bordes del mapa).
+ * También es el tamaño de la miniatura del álbum (máx. 160×90).
+ */
 export const PHOTO_FRAME = { width: 160, height: 90 } as const;
 
-/** Fracción mínima del hitbox dentro del marco para que la foto cuente (1 ★). */
+/**
+ * Fracción mínima del hitbox dentro del marco para que la foto cuente (1 ★). Si la criatura es más
+ * grande que el marco, se mide sobre la parte que cabe en él (llenar el encuadre también cuenta).
+ */
 export const PHOTO_MIN_FRAMING = 0.6;
 
 /** Segundos mínimos entre fotos. */
