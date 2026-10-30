@@ -1,12 +1,12 @@
 import * as Phaser from 'phaser';
 
-/** Primera escena. En fases siguientes pasará por Preload antes del título. */
+/** Primera escena: pasa a Preload, que carga los assets antes del título. */
 export class BootScene extends Phaser.Scene {
   constructor() {
     super('Boot');
   }
 
   create(): void {
-    this.scene.start('Title');
+    this.scene.start('Preload');
   }
 }

@@ -29,6 +29,25 @@ export class TitleScene extends Phaser.Scene {
       color: css('text'),
     });
     this.placeCentered(subtitle, 140);
+
+    const prompt = this.add.text(0, 0, 'PULSA ENTER', {
+      fontFamily: FONT_FAMILY,
+      fontSize: '10px',
+      color: css('metal2'),
+    });
+    this.placeCentered(prompt, 208);
+    // Parpadeo lento (1 s) para no molestar; la opción de reducir parpadeos llega en §13.
+    this.time.addEvent({ delay: 500, loop: true, callback: () => prompt.setVisible(!prompt.visible) });
+
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      this.scene.start('Station', { mapa: 'muelle' });
+    };
+    this.input.keyboard?.once('keydown-ENTER', start);
+    this.input.keyboard?.once('keydown-SPACE', start);
+    this.input.once('pointerdown', start);
   }
 
   /** Centra en horizontal redondeando a píxel entero (evita medio píxel con origin 0.5). */

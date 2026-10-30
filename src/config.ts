@@ -7,6 +7,16 @@ export const GAME_HEIGHT = 270;
 /** Tamaño de tile (§9.1). */
 export const TILE_SIZE = 16;
 
+/** Velocidad del jugador en px/s a resolución interna. */
+export const PLAYER_SPEED = 80;
+
+/**
+ * Zona muerta de la cámara (px, centrada en pantalla). Dentro de ella el jugador se mueve sin
+ * desplazar la cámara; al salir, la cámara lo empuja en píxeles enteros, sin lerp, para que el
+ * jugador nunca oscile 1 px respecto al fondo (§9.1).
+ */
+export const CAMERA_DEADZONE = { width: 48, height: 32 } as const;
+
 /** Paleta única del juego (§9.2). No usar colores fuera de esta tabla. */
 export const PALETTE = {
   void0: 0x07070d,

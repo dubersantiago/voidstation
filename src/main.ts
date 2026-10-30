@@ -1,6 +1,8 @@
 import * as Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH, PALETTE } from './config';
 import { BootScene } from './scenes/BootScene';
+import { PreloadScene } from './scenes/PreloadScene';
+import { StationScene } from './scenes/StationScene';
 import { TitleScene } from './scenes/TitleScene';
 
 const game = new Phaser.Game({
@@ -16,7 +18,11 @@ const game = new Phaser.Game({
     mode: Phaser.Scale.NONE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [BootScene, TitleScene],
+  physics: {
+    default: 'arcade',
+    arcade: { debug: false },
+  },
+  scene: [BootScene, PreloadScene, TitleScene, StationScene],
 });
 
 /** Mayor factor entero que cabe en la ventana; el sobrante queda como letterbox. */
