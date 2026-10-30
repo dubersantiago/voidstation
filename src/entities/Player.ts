@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import { PLAYER_SPEED } from '../config';
+import { PLAYER_SPEED, SNEAK_SPEED_FACTOR } from '../config';
 
 /** Hitbox de los pies: en vista 3/4 solo los pies chocan, la cabeza puede solapar muros. */
 const FEET = { width: 10, height: 6 } as const;
@@ -18,7 +18,7 @@ export class Player {
   readonly sprite: Phaser.GameObjects.Image;
   private readonly feet: Phaser.GameObjects.Zone;
   private readonly body: Phaser.Physics.Arcade.Body;
-  private readonly keys: Record<'up' | 'down' | 'left' | 'right' | 'w' | 'a' | 's' | 'd', Phaser.Input.Keyboard.Key>;
+  private readonly keys: Record<'up' | 'down' | 'left' | 'right' | 'w' | 'a' | 's' | 'd' | 'sneak', Phaser.Input.Keyboard.Key>;
 
   /** (x, y) = punto en el suelo bajo los pies. */
   constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -39,9 +39,15 @@ export class Player {
       a: K.A,
       s: K.S,
       d: K.D,
+      sneak: K.SHIFT,
     }) as Player['keys'];
 
     this.syncSprite();
+  }
+
+  /** Hitbox de los pies en el mundo (para compuertas). */
+  get feetRect(): Phaser.Geom.Rectangle {
+    return new Phaser.Geom.Rectangle(this.body.x, this.body.y, this.body.width, this.body.height);
   }
 
   /** Objeto con cuerpo de física, para colliders. */
@@ -73,6 +79,9 @@ export class Player {
   /** Multiplicador de velocidad (modo cámara, §4). */
   speedFactor = 1;
 
+  /** true si corre: se mueve sin Shift y fuera del modo cámara. */
+  noisy = false;
+
   /** Con la dirección bloqueada el jugador se mueve sin girar (modo cámara: mantiene el encuadre). */
   facingLocked = false;
 
@@ -83,7 +92,11 @@ export class Player {
 
     // Normalizado: en diagonal no se va más rápido.
     const len = Math.hypot(dx, dy) || 1;
-    const speed = PLAYER_SPEED * this.speedFactor;
+    const sneaking = this.keys.sneak.isDown;
+    const speed = PLAYER_SPEED * Math.min(this.speedFactor, sneaking ? SNEAK_SPEED_FACTOR : 1);
+    const moving = dx !== 0 || dy !== 0;
+    // Hace ruido si se mueve a velocidad normal (ni sigiloso ni en modo cámara): asusta a las criaturas (§4).
+    this.noisy = moving && !sneaking && this.speedFactor >= 1;
     this.body.setVelocity((dx / len) * speed, (dy / len) * speed);
 
     if ((dx !== 0 || dy !== 0) && !this.facingLocked) {

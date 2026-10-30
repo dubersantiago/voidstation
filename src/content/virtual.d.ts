@@ -2,5 +2,6 @@
 declare module 'virtual:voidstation-content' {
   export const sectoresRaw: string;
   export const archivos: Record<string, string>;
+  export const registros: Record<string, string>;
   export const incluyePrivado: boolean;
 }

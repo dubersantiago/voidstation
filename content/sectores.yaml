@@ -1,6 +1,8 @@
 # Sectores de la estación (§5, §8.2). El primero de la lista es donde empieza la partida.
 # mapa: archivo en public/assets/maps/, o ??? si el sector aún no tiene mapa.
-# fotos_requeridas: fotos para abrir el sector (§3). ??? = por decidir.
+# fotos_requeridas: individuos confirmados fotografiados (ÍNDICE RESTAURADO) para abrir
+# la compuerta que lleva a este sector (§3). ??? = por decidir.
+# Conexiones (§5): Muelle → Fundición → Archivos / Titanes / Bóvedas; Titanes → Colmena.
 
 - id: muelle
   nombre: Muelle de Atraque
@@ -8,21 +10,21 @@
   fotos_requeridas: 0
 - id: fundicion
   nombre: Fundición
-  mapa: ???
+  mapa: fundicion.tmj
   fotos_requeridas: 2
 - id: titanes
   nombre: Bahía de Titanes
-  mapa: ???
-  fotos_requeridas: ???
+  mapa: titanes.tmj
+  fotos_requeridas: 4
 - id: colmena
   nombre: La Colmena
-  mapa: ???
-  fotos_requeridas: ???
+  mapa: colmena.tmj
+  fotos_requeridas: 7
 - id: bovedas
   nombre: Bóvedas
-  mapa: ???
-  fotos_requeridas: ???
+  mapa: bovedas.tmj
+  fotos_requeridas: 4
 - id: archivos
   nombre: Sala de Archivos
-  mapa: ???
-  fotos_requeridas: ???
+  mapa: archivos.tmj
+  fotos_requeridas: 2

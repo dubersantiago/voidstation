@@ -2,7 +2,7 @@
 // En el build público los bloques <!-- privado --> y las criaturas con `publico: false` se eliminan
 // aquí, en Node: nunca llegan al bundle de dist/.
 
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import type { Plugin } from 'vite';
 import { stringify } from 'yaml';
@@ -16,6 +16,29 @@ export interface ContentBundle {
   sectoresRaw: string;
   /** Ruta (`/content/bestiario/<id>.md`) → texto ya filtrado. */
   archivos: Record<string, string>;
+  /** Ruta (`/content/registros/<id>.md`) → texto ya filtrado. */
+  registros: Record<string, string>;
+}
+
+/** Registros (terminales, monolitos): sin bloques privados y sin los `publico: false`. */
+function buildRegistros(contentDir: string, incluirPrivado: boolean): Record<string, string> {
+  const dir = join(contentDir, 'registros');
+  if (!existsSync(dir)) return {};
+  const out: Record<string, string> = {};
+  for (const f of readdirSync(dir).filter((f) => f.endsWith('.md'))) {
+    const raw = readFileSync(join(dir, f), 'utf8');
+    if (!incluirPrivado) {
+      let meta: unknown;
+      try {
+        meta = splitFrontmatter(raw)?.meta;
+      } catch {
+        meta = null;
+      }
+      if (typeof meta === 'object' && meta !== null && (meta as Record<string, unknown>).publico === false) continue;
+    }
+    out[`/content/registros/${f}`] = incluirPrivado ? raw : raw.replace(PRIVATE_BLOCK, '');
+  }
+  return out;
 }
 
 /** Lee content/ y, si `incluirPrivado` es false, elimina todo lo privado. */
@@ -26,8 +49,9 @@ export function buildContent(contentDir: string, incluirPrivado: boolean): Conte
     .filter((f) => f.endsWith('.md'))
     .map((f) => ({ id: basename(f, '.md'), raw: readFileSync(join(dir, f), 'utf8') }));
 
+  const registros = buildRegistros(contentDir, incluirPrivado);
   if (incluirPrivado) {
-    return { sectoresRaw, archivos: Object.fromEntries(raws.map((r) => [`/content/bestiario/${r.id}.md`, r.raw])) };
+    return { sectoresRaw, registros, archivos: Object.fromEntries(raws.map((r) => [`/content/bestiario/${r.id}.md`, r.raw])) };
   }
 
   const parsed = raws.map((r) => {
@@ -55,7 +79,7 @@ export function buildContent(contentDir: string, incluirPrivado: boolean): Conte
 
     archivos[`/content/bestiario/${p.id}.md`] = `---\n${stringify(meta)}---\n${p.split.cuerpo.replace(PRIVATE_BLOCK, '')}`;
   }
-  return { sectoresRaw, archivos };
+  return { sectoresRaw, archivos, registros };
 }
 
 /**
@@ -77,10 +101,11 @@ export function contentPlugin(): Plugin {
     },
     load(id) {
       if (id !== RESOLVED_ID) return;
-      const { sectoresRaw, archivos } = buildContent(contentDir, incluirPrivado);
+      const { sectoresRaw, archivos, registros } = buildContent(contentDir, incluirPrivado);
       return [
         `export const sectoresRaw = ${JSON.stringify(sectoresRaw)};`,
         `export const archivos = ${JSON.stringify(archivos)};`,
+        `export const registros = ${JSON.stringify(registros)};`,
         `export const incluyePrivado = ${incluirPrivado};`,
       ].join('\n');
     },

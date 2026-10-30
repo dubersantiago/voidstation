@@ -33,6 +33,11 @@ export class Progress {
     return this.data.individuos.filter((k) => this.objetivo.has(k)).length;
   }
 
+  /** Censo completo: todos los individuos confirmados fotografiados (§3). */
+  get completo(): boolean {
+    return this.total > 0 && this.restaurados >= this.total;
+  }
+
   /** Nivel de ficha desbloqueado (0–3). */
   nivel(id: string): number {
     return this.data.criaturas[id]?.estrellas ?? 0;

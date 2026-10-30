@@ -36,6 +36,23 @@
 .hud-light.on {
   color: var(--amber3);
 }
+.hud-sector {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  transform: translateX(-50%);
+  color: var(--metal2);
+}
+.hud-prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 44px;
+  transform: translateX(-50%);
+  padding: 1px 4px;
+  color: var(--amber3);
+  background: var(--void1);
+  border: 1px solid var(--amber1);
+}
 .hud-help {
   position: absolute;
   left: 6px;

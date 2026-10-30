@@ -10,7 +10,7 @@ sprite: titan-proxmox
 hitbox: [144, 96]
 comportamiento: inmovil
 estado_fotogenico: crisalida_encendida
-rango_ideal: [96, 200]
+rango_ideal: [80, 160]
 radio_huida: 0
 host: '-'                     # es el propio nodo físico
 relaciones: [terraform-arquitecta]

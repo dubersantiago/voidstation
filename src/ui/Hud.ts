@@ -1,4 +1,4 @@
-// HUD: contador del objetivo (§3), estado de la linterna y aviso con el resultado de cada foto.
+// HUD: contador del objetivo (§3), sector, linterna, indicación de interacción y avisos.
 import type { PhotoScore } from '../systems/Photo';
 import type { Unlock } from '../systems/Progress';
 import { el, uiRoot } from './overlay';
@@ -13,6 +13,8 @@ export class Hud {
   private readonly root: HTMLDivElement;
   private readonly index: HTMLDivElement;
   private readonly light: HTMLDivElement;
+  private readonly sector: HTMLDivElement;
+  private readonly prompt: HTMLDivElement;
   private readonly toast: HTMLDivElement;
   private toastTimer = 0;
 
@@ -20,7 +22,10 @@ export class Hud {
     this.root = el('div', 'hud', uiRoot());
     this.index = el('div', 'hud-index', this.root);
     this.light = el('div', 'hud-light', this.root);
-    el('div', 'hud-help', this.root).textContent = 'C/CLIC DER. CÁMARA · ESPACIO/CLIC FOTO · F LINTERNA · Q ÁLBUM · TAB BESTIARIO';
+    this.sector = el('div', 'hud-sector', this.root);
+    this.prompt = el('div', 'hud-prompt hidden', this.root);
+    el('div', 'hud-help', this.root).textContent =
+      'C CÁMARA · ESPACIO FOTO · F LINTERNA · SHIFT SIGILO · E USAR · Q ÁLBUM · TAB BESTIARIO';
     this.toast = el('div', 'toast hidden', this.root);
   }
 
@@ -31,6 +36,23 @@ export class Hud {
   setFlashlight(on: boolean): void {
     this.light.textContent = on ? 'LINTERNA ON' : 'LINTERNA OFF';
     this.light.classList.toggle('on', on);
+  }
+
+  setSector(nombre: string): void {
+    this.sector.textContent = nombre.toUpperCase();
+  }
+
+  /** Indicación de interacción (p. ej. "E LEER"); null la oculta. */
+  setPrompt(text: string | null): void {
+    this.prompt.textContent = text ?? '';
+    this.prompt.classList.toggle('hidden', !text);
+  }
+
+  /** Aviso de texto (una línea por elemento). */
+  showMessage(...lines: string[]): void {
+    this.toast.replaceChildren();
+    for (const l of lines) el('div', '', this.toast).textContent = l;
+    this.showToast();
   }
 
   /** Resultado de una foto: ★ por criatura y qué criterio de §4 se cumplió. */
@@ -55,6 +77,10 @@ export class Hud {
       }
     }
 
+    this.showToast();
+  }
+
+  private showToast(): void {
     this.toast.classList.remove('hidden');
     window.clearTimeout(this.toastTimer);
     this.toastTimer = window.setTimeout(() => this.toast.classList.add('hidden'), TOAST_MS);

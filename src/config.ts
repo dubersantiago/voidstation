@@ -47,6 +47,24 @@ export const FLASHLIGHT = { range: 160, halfAngle: 35 } as const;
 /** Ciclo del estado fotogénico (§8.3), en segundos: [mín, máx]. */
 export const PHOTOGENIC = { interval: [8, 16], duration: [2, 4] } as const;
 
+/** Huida (§4): segundos que dura y velocidad (px/s). */
+export const FLEE = { duration: 1.5, speed: 60 } as const;
+
+/** Shift (§12): velocidad al caminar sigiloso. Sigiloso no asusta a las criaturas. */
+export const SNEAK_SPEED_FACTOR = 0.5;
+
+/** Distancia (px) para interactuar con terminales y la baliza (E). */
+export const INTERACT_RADIUS = 28;
+
+/** Distancia (px) a la que una señal no identificada se anuncia (§7). */
+export const SIGNAL_NOTICE_RADIUS = 48;
+
+/** Radio (px) de la luz tenue alrededor del jugador, siempre encendida (§9.5). */
+export const PLAYER_LIGHT_RADIUS = 24;
+
+/** Radio (px) de la luz de criaturas con `luz_propia` y de la baliza activa. */
+export const CREATURE_LIGHT_RADIUS = 32;
+
 /** Clave de guardado en localStorage. Cambiar la versión invalida partidas incompatibles. */
 export const SAVE_KEY = 'voidstation:save:v1';
 

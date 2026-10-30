@@ -48,6 +48,16 @@ export interface Criatura {
   cuerpo: string;
 }
 
+/** Texto legible en una terminal o monolito (§1: decisiones, notas, comandos). */
+export interface Registro {
+  id: string;
+  titulo: string;
+  sector: string;
+  publico: boolean;
+  /** Cuerpo Markdown. */
+  cuerpo: string;
+}
+
 export interface Problema {
   archivo: string;
   mensaje: string;
@@ -193,18 +203,56 @@ export function parseCriatura(raw: string, archivo: string): { criatura: Criatur
   };
 }
 
+export function parseRegistro(raw: string, archivo: string): { registro: Registro | null; errores: string[] } {
+  const errores: string[] = [];
+  let split: ReturnType<typeof splitFrontmatter>;
+  try {
+    split = splitFrontmatter(raw);
+  } catch (e) {
+    return { registro: null, errores: [`frontmatter YAML inválido: ${(e as Error).message}`] };
+  }
+  if (!split || !isObj(split.meta)) return { registro: null, errores: ['falta el frontmatter (bloque entre `---`)'] };
+  const m = split.meta;
+
+  for (const campo of ['id', 'titulo', 'sector'] as const) {
+    if (!isStr(m[campo])) errores.push(`falta el campo obligatorio \`${campo}\` (texto)`);
+  }
+  if (typeof m.publico !== 'boolean') errores.push('`publico` debe ser true o false');
+  const esperado = archivo.replace(/^.*[\\/]/, '').replace(/\.md$/, '');
+  if (isStr(m.id) && m.id !== esperado) errores.push(`\`id\` ("${m.id}") no coincide con el nombre del archivo ("${esperado}")`);
+  if (errores.length) return { registro: null, errores };
+
+  return {
+    registro: { id: m.id as string, titulo: m.titulo as string, sector: m.sector as string, publico: m.publico as boolean, cuerpo: split.cuerpo },
+    errores,
+  };
+}
+
 /**
- * Valida todo el contenido. `archivos` mapea ruta → texto del .md.
- * Las criaturas con errores no se incluyen en `datos`.
+ * Valida todo el contenido. `archivos` y `registrosRaw` mapean ruta → texto del .md.
+ * Las criaturas y registros con errores no se incluyen.
  */
 export function loadContent(
   sectoresRaw: string,
   archivos: Record<string, string>,
-): { sectores: Sector[]; criaturas: Criatura[]; errores: Problema[]; avisos: Problema[] } {
+  registrosRaw: Record<string, string> = {},
+): { sectores: Sector[]; criaturas: Criatura[]; registros: Registro[]; errores: Problema[]; avisos: Problema[] } {
   const sec = parseSectores(sectoresRaw);
   const errores = [...sec.errores];
   const avisos = [...sec.avisos];
   const sectorIds = new Set(sec.datos.map((s) => s.id));
+
+  const registros: Registro[] = [];
+  for (const [archivo, raw] of Object.entries(registrosRaw).sort(([a], [b]) => a.localeCompare(b))) {
+    const r = parseRegistro(raw, archivo);
+    errores.push(...r.errores.map((mensaje) => ({ archivo, mensaje })));
+    if (!r.registro) continue;
+    if (!sectorIds.has(r.registro.sector)) {
+      errores.push({ archivo, mensaje: `sector "${r.registro.sector}" no existe en sectores.yaml` });
+      continue;
+    }
+    registros.push(r.registro);
+  }
 
   const candidatas: { archivo: string; c: Criatura }[] = [];
   for (const [archivo, raw] of Object.entries(archivos).sort(([a], [b]) => a.localeCompare(b))) {
@@ -233,5 +281,5 @@ export function loadContent(
     if (!propios.length) criaturas.push(c);
   }
 
-  return { sectores: sec.datos, criaturas, errores, avisos };
+  return { sectores: sec.datos, criaturas, registros, errores, avisos };
 }

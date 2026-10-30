@@ -30,7 +30,8 @@ function overlapFraction(inner: Phaser.Geom.Rectangle, outer: Phaser.Geom.Rectan
  * En su estado fotogénico → +1 ★.
  */
 export function scoreCreature(creature: Creature, frame: Phaser.Geom.Rectangle, light: LightSource): PhotoScore {
-  const encuadre = overlapFraction(creature.rect, frame);
+  // Las señales no identificadas y lo que está fuera del mundo (fase) no se pueden fotografiar.
+  const encuadre = creature.isSignal || !creature.visible ? 0 : overlapFraction(creature.rect, frame);
   const distancia = Math.hypot(creature.centerX - light.x, creature.centerY - light.y);
   const [min, max] = creature.datos.rango_ideal;
   const enRango = distancia >= min && distancia <= max;
